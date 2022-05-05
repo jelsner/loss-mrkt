@@ -5,7 +5,10 @@ editor_options:
   chunk_output_type: console
 ---
 
-Read in the data
+Data from https://www.icatdamageestimator.com/faq#4q
+Could update with https://www.reinsurancene.ws/insurance-industry-losses-events-data/
+
+Read in the data only through 2017
 ```{r}
 PerLandfall.df <- readr::read_csv(here::here("data", "stormData.csv")) |>
   dplyr::rename(Name = `STORM NAME`, 
