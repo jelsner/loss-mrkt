@@ -7,14 +7,37 @@ editor_options:
 
 Read in the data
 ```{r}
-damages.df <- readr::read_csv(here::here("data", "stormData.csv"))
+PerLandfall.df <- readr::read_csv(here::here("data", "stormData.csv")) |>
+  dplyr::rename(Name = `STORM NAME`, 
+                LandfallDate = `LANDFALL DATE`,
+                DamageRank = `DAMAGE RANK`, 
+                CurrentDamage2022 = `CURRENT DAMAGE ($ 2022)`,
+                BaseDamageDollars = `BASE DAMAGE ($)`,
+                LandfallState = `LANDFALL STATE`,
+                Category = `CATEGORY`,
+                WindsAtLandfall_mph = `WINDS(MPH)`)
 
-damages.df <- damages.df |>
-  dplyr::mutate(Date = lubridate::parse_date_time(damages.df$`LANDFALL DATE`,
-                           orders = 'mdy'),
+PerLandfall.df <- PerLandfall.df |>
+  dplyr::mutate(Date = lubridate::parse_date_time(LandfallDate,
+                                                  orders = 'mdy'),
                 Year = lubridate::year(Date),
-                YearName = paste0(Year, `STORM NAME`)) |>
+                YearName = paste0(Year, Name)) |>
   dplyr::filter(Year >= 1987)
 ```
 
 Insured damages (losses) are .5 of the total economic damages.
+```{r}
+PerStorm.df <- PerLandfall.df |>
+  dplyr::mutate(InsuredLosses2022 = .5 * CurrentDamage2022) |>
+  dplyr::group_by(YearName) |>
+  dplyr::summarise(Year = dplyr::last(Year),
+                   Name = dplyr::last(Name),
+                   PerStormInsuredLosses2022 = sum(InsuredLosses2022))
+```
+
+Tranches
+```{r}
+Z <- PerStorm.df$PerStormInsuredLosses2022
+
+quantile(Z, probs = seq(0, 1, 1/7))
+```
