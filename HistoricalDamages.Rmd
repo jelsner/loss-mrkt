@@ -1,0 +1,20 @@
+---
+title: "Historical hurricane damage data from ICAT"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+Read in the data
+```{r}
+damages.df <- readr::read_csv(here::here("data", "stormData.csv"))
+
+damages.df <- damages.df |>
+  dplyr::mutate(Date = lubridate::parse_date_time(damages.df$`LANDFALL DATE`,
+                           orders = 'mdy'),
+                Year = lubridate::year(Date),
+                YearName = paste0(Year, `STORM NAME`)) |>
+  dplyr::filter(Year >= 1987)
+```
+
+Insured damages (losses) are .5 of the total economic damages.
